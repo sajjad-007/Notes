@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { type } = require('os');
-
+const jwt = require('jsonwebtoken');
 const userSchema = new Schema(
   {
     userName: {
@@ -47,6 +46,12 @@ const userSchema = new Schema(
     otpExpired: {
       type: String,
     },
+    token: {
+      String,
+    },
+    tokenExpire: {
+      String,
+    },
   },
   { timestamps: true }
 );
@@ -62,6 +67,12 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.generateOtp = function () {
   const otp = Math.floor(Math.random() * 90000) + 10000;
   return otp;
+};
+userSchema.methods.generateJwtToken = async function (userId) {
+  const token = await jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+  return token;
 };
 
 const User = mongoose.model('user', userSchema);

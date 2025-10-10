@@ -2,6 +2,8 @@ const { User } = require('../model/userSchema');
 const { catchAsyncError } = require('../middleware/asyncError');
 const { ErrorHandler } = require('../middleware/error');
 const { cloudinaryUpload } = require('../helpers/cloudinary');
+const { emailTemplate } = require('../helpers/emailTemplate');
+const { SendEmail } = require('../utils/nodemailer');
 
 //create a new user
 const register = catchAsyncError(async (req, res, next) => {
@@ -38,7 +40,7 @@ const register = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler('Image not found!'));
   }
 
-  // upload image in cloudinary
+  // upload image on cloudinary
   const uploadImgOnCloudinary = await cloudinaryUpload(
     image.tempFilePath,
     next
@@ -57,9 +59,13 @@ const register = catchAsyncError(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler('Failed to craete database', 400));
   }
+  // generate
   user.otp = await user.generateOtp();
   user.otpExpired = Date.now() * 10 * 60 * 1000;
+  const myOtpTemplate = emailTemplate(user.otp);
+  await SendEmail(user.email, 'OTP Verification', myOtpTemplate);
   await user.save();
+  //otp set to email template
   res.json({
     success: true,
     message: 'Registration successfully!',
@@ -67,5 +73,8 @@ const register = catchAsyncError(async (req, res, next) => {
   });
 });
 
+const otpVerify = catchAsyncError(async (req, res, next) => {
+  console.log('hellowerd');
+});
 
-module.exports = { register };
+module.exports = { register, otpVerify };
