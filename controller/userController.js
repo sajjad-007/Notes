@@ -4,6 +4,7 @@ const { ErrorHandler } = require('../middleware/error');
 const { cloudinaryUpload } = require('../helpers/cloudinary');
 const { emailTemplate } = require('../helpers/emailTemplate');
 const { SendEmail } = require('../utils/nodemailer');
+const { jsonwebtoken } = require('../helpers/jwtToken');
 
 //create a new user
 const register = catchAsyncError(async (req, res, next) => {
@@ -64,7 +65,7 @@ const register = catchAsyncError(async (req, res, next) => {
   user.otpExpired = Date.now() * 10 * 60 * 1000;
   const myOtpTemplate = emailTemplate(user.otp);
   await SendEmail(user.email, 'OTP Verification', myOtpTemplate);
-  await user.save();
+  await user.save({ validateBeforeSave: true });
   //otp set to email template
   res.json({
     success: true,
@@ -74,7 +75,47 @@ const register = catchAsyncError(async (req, res, next) => {
 });
 
 const otpVerify = catchAsyncError(async (req, res, next) => {
-  console.log('hellowerd');
+  const { otp, email } = req.body;
+  try {
+    const findUser = await User.find({
+      email,
+      accountVerified: false,
+    }).sort({ createdAt: -1 });
+
+    let user;
+    //if a user tried to register a couple of time, the his email will be stored in our database
+    // so that why we will delete previous attempt
+    if (findUser.length > 1) {
+      //our current user-info will be stored in 'user'
+      user = findUser[0];
+      const removeExpiredEmails = await User.deleteMany({
+        //$ne = not equal
+        _id: { $ne: user._id },
+        $or: [{ email: email, accountVerified: false }],
+      });
+      if (!removeExpiredEmails) {
+        return next(new ErrorHandler('User remove unsuccessfull!', 400));
+      }
+    } else {
+      user = findUser[0];
+    }
+
+    //check is otp match
+    if (user.otp != otp) {
+      return next(new ErrorHandler("OTP didn't match!", 401));
+    }
+    const token = await user.generateJwtToken(user._id);
+    console.log(token);
+    user.accountVerified = true;
+    user.otp = null;
+    user.otpExpired = null;
+
+    await user.save({ validateBeforeSave: true });
+    jsonwebtoken(token, 'Otp Verification successfull', user, res, 200);
+  } catch (error) {
+    console.log(error);
+    return next(new ErrorHandler('Error from otp verify', 500));
+  }
 });
 
 module.exports = { register, otpVerify };

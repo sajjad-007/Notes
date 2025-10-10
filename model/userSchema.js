@@ -46,10 +46,10 @@ const userSchema = new Schema(
     otpExpired: {
       type: String,
     },
-    token: {
+    ResetToken: {
       String,
     },
-    tokenExpire: {
+    resetTokenExpire: {
       String,
     },
   },
@@ -68,8 +68,8 @@ userSchema.methods.generateOtp = function () {
   const otp = Math.floor(Math.random() * 90000) + 10000;
   return otp;
 };
-userSchema.methods.generateJwtToken = async function (userId) {
-  const token = await jwt.sign({ id }, process.env.JWT_SECRET, {
+userSchema.methods.generateJwtToken = function (userId) {
+  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
   return token;
