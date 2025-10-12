@@ -1,4 +1,4 @@
-const jsonwebtoken = (user, message, res, statusCode) => {
+const generateJsonwebtoken = (user, message, res, statusCode) => {
   const token = user.generateJwtToken(user._id);
   res
     .status(statusCode)
@@ -6,7 +6,7 @@ const jsonwebtoken = (user, message, res, statusCode) => {
       expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'None',
     })
     .json({
       success: true,
@@ -16,4 +16,4 @@ const jsonwebtoken = (user, message, res, statusCode) => {
     });
 };
 
-module.exports = { jsonwebtoken };
+module.exports = { generateJsonwebtoken };

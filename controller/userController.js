@@ -4,7 +4,9 @@ const { ErrorHandler } = require('../middleware/error');
 const { cloudinaryUpload } = require('../helpers/cloudinary');
 const { emailTemplate } = require('../helpers/emailTemplate');
 const { SendEmail } = require('../utils/nodemailer');
-const { jsonwebtoken } = require('../helpers/jwtToken');
+const { generateJsonwebtoken } = require('../helpers/jwtToken');
+const cloudinary = require('cloudinary');
+const { removeCookie } = require('../helpers/removeCookies');
 
 //create a new user
 const register = catchAsyncError(async (req, res, next) => {
@@ -124,7 +126,7 @@ const otpVerify = catchAsyncError(async (req, res, next) => {
     user.otpExpired = null;
 
     await user.save({ validateBeforeSave: true });
-    jsonwebtoken(user, 'Otp verification successfull', res, 200);
+    generateJsonwebtoken(user, 'Otp verification successfull', res, 200);
     // jsonwebtoken(token, 'Otp Verification successfull', user, res, 200);
   } catch (error) {
     console.log(error);
@@ -132,4 +134,26 @@ const otpVerify = catchAsyncError(async (req, res, next) => {
   }
 });
 
-module.exports = { register, otpVerify };
+//delete user
+
+const deleteUser = catchAsyncError(async (req, res, next) => {
+  const { id } = req.body;
+  const findUser = await User.findById({ _id: id });
+  if (!findUser) {
+    return next(new ErrorHandler('User not found', 404));
+  }
+  const ImageId = findUser.image.public_id;
+  await cloudinary.uploader.destroy(ImageId);
+  await findUser.deleteOne();
+  removeCookie(res, 'User deleted successfully');
+});
+
+// logout
+
+const logout = catchAsyncError(async (req, res, next) => {
+  removeCookie(res, 'Logout successfull!');
+});
+
+//login route
+
+module.exports = { register, otpVerify, deleteUser, logout };
