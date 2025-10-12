@@ -32,7 +32,7 @@ const emailTemplate = otp => {
               <p>If you didn't request this, you can safely ignore this email.</p>
             </div>
             <div class="footer">
-              © 2025 AUTHORAIZATION. All rights reserved. <br/>
+              © 2025 SAJJAD. All rights reserved. <br/>
             </div>
           </div>
         </td>

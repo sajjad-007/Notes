@@ -1,14 +1,17 @@
-const jsonwebtoken = (token, message, user, res, statusCode) => {
+const jsonwebtoken = (user, message, res, statusCode) => {
+  const token = user.generateJwtToken(user._id);
   res
-    .statusCode(statusCode)
+    .status(statusCode)
     .cookie('token', token, {
+      expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
       httpOnly: true,
       secure: true,
-      sameSite: 'None',
+      sameSite: 'none',
     })
     .json({
       success: true,
-      messaeg: message,
+      message,
+      token,
       user,
     });
 };

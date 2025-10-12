@@ -77,6 +77,14 @@ const register = catchAsyncError(async (req, res, next) => {
 const otpVerify = catchAsyncError(async (req, res, next) => {
   const { otp, email } = req.body;
   try {
+    //find if user is already verified
+    const verifiedUser = await User.findOne({
+      email,
+      accountVerified: true,
+    });
+    if (verifiedUser) {
+      return next(new ErrorHandler('User is already exist!', 401));
+    }
     const findUser = await User.find({
       email,
       accountVerified: false,
@@ -99,19 +107,25 @@ const otpVerify = catchAsyncError(async (req, res, next) => {
     } else {
       user = findUser[0];
     }
+    // const otpExpiredTime = new Date(user.otpExpired).getTime();
+    const otpExpiredTime = user.otpExpired;
+    const currentTime = Date.now();
 
-    //check is otp match
+    if (currentTime > otpExpiredTime) {
+      return next(new ErrorHandler('OTP has been expired!', 400));
+    }
+
     if (user.otp != otp) {
       return next(new ErrorHandler("OTP didn't match!", 401));
     }
-    const token = await user.generateJwtToken(user._id);
-    console.log(token);
+
     user.accountVerified = true;
     user.otp = null;
     user.otpExpired = null;
 
     await user.save({ validateBeforeSave: true });
-    jsonwebtoken(token, 'Otp Verification successfull', user, res, 200);
+    jsonwebtoken(user, 'Otp verification successfull', res, 200);
+    // jsonwebtoken(token, 'Otp Verification successfull', user, res, 200);
   } catch (error) {
     console.log(error);
     return next(new ErrorHandler('Error from otp verify', 500));
