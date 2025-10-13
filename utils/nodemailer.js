@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const SendEmail = async (userEmail, message, emailTemplate) => {
+const SendEmail = async (userEmail, message, emailTemplate, urlMessage) => {
   const transport = nodemailer.createTransport({
     host: process.env.NODEMAILER_HOST,
     port: process.env.NODEMAILER_PORT,
@@ -16,12 +16,13 @@ const SendEmail = async (userEmail, message, emailTemplate) => {
       from: process.env.ADMIN_EMAIL,
       to: userEmail,
       subject: message,
-      html: emailTemplate,
+      html: emailTemplate || '',
+      text: urlMessage || '',
     });
     // console.log(messageInfo.messageId);
     // return next(new ErrorHandler(`Otp sent at ${userEmail}`, 200));
   } catch (error) {
-    console.error('Error', error);
+    console.error('Error from nodemailer', error);
     // return next(new ErrorHandler('Error from nodemailer', 500));
   }
 };
