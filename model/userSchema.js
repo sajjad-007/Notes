@@ -11,10 +11,12 @@ const userSchema = new Schema(
       required: [true, 'User Name is requried'],
       min: [2, 'Minimum 2 characters'],
       max: [30, 'Maximum 30 characters'],
+      trim: true,
     },
     email: {
       type: String,
       required: [true, 'Email is required'],
+      trim: true,
     },
     password: {
       type: String,
@@ -22,10 +24,12 @@ const userSchema = new Schema(
       required: [true, 'Password is required'],
       min: [5, 'At least 5 characters'],
       max: [16, 'Maximum 16 characters'],
+      trim: true,
     },
     address: {
       type: String,
       required: [true, 'Password is required!'],
+      trim: true,
     },
     image: {
       public_id: {

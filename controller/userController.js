@@ -257,6 +257,9 @@ const resetPassword = catchAsyncError(async (req, res, next) => {
   removeCookie(res, 'Password changed successfull');
 });
 
+// 
+
+
 module.exports = {
   register,
   otpVerify,
