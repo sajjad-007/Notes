@@ -50,5 +50,55 @@ const deleteTask = catchAsyncError(async (req, res, next) => {
     task,
   });
 });
+// Not finished these routes yet
+const completedTask = catchAsyncError(async (req, res, next) => {
+  // find all my task
+  const { id } = req.params;
+  if (!id) {
+    return next(new ErrorHandler('Credentials Missing!', 404));
+  }
+  const task = await dailyTask.findByIdAndDelete({ _id: id });
+  if (!task) {
+    return next(new ErrorHandler('Task Not found!', 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: 'Task completed successfully',
+    task,
+  });
+});
+const pendingTask = catchAsyncError(async (req, res, next) => {
+  // find all my task
+  const { id } = req.params;
+  if (!id) {
+    return next(new ErrorHandler('Credentials Missing!', 404));
+  }
+  const task = await dailyTask.findByIdAndDelete({ _id: id });
+  if (!task) {
+    return next(new ErrorHandler('Task Not found!', 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: 'Task removed!',
+    task,
+  });
+});
+const overDueTask = catchAsyncError(async (req, res, next) => {
+  // find all my task
+  const { id } = req.params;
+  if (!id) {
+    return next(new ErrorHandler('Credentials Missing!', 404));
+  }
+  const task = await dailyTask.findByIdAndDelete({ _id: id });
+  if (!task) {
+    return next(new ErrorHandler('Task Not found!', 404));
+  }
+  res.status(200).json({
+    success: true,
+    message: 'Task removed!',
+    task,
+  });
+});
+// Not finished these routes yet
 
 module.exports = { createTask, getAllTask, deleteTask };

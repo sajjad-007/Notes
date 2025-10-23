@@ -15,7 +15,7 @@ const dailyTaskSchema = new Schema(
     },
     Status: {
       type: String,
-      enum: ['Pending', 'Finished'],
+      enum: ['Pending', 'Completed', 'Overdue'],
       default: 'Pending',
     },
   },
