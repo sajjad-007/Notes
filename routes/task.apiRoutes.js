@@ -3,12 +3,14 @@ const {
   createTask,
   getAllTask,
   deleteTask,
+  completedTask,
+  getAllcompletedTask,
 } = require('../controller/dailytaskController');
 const _ = express.Router();
 
 _.route('/createTask').post(createTask);
 _.route('/getTask').get(getAllTask);
 _.route('/deleteTask/:id').delete(deleteTask);
-// _.route('/completedTask/:id').delete(deleteTask);
+_.route('/completedTask').post(completedTask).get(getAllcompletedTask);
 
 module.exports = _;
